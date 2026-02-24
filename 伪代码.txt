@@ -1,0 +1,261 @@
+
+Socio：保存会员编号和姓名，并提供读取与显示方法。
+类 Socio会员 {
+
+    // ===== 属性（私有）=====
+    私有 整数 numeroSocio;   // 会员编号
+    私有 字符串 nombre;      // 会员姓名
+
+    // ===== 构造器 =====
+    公有 Socio(整数 numeroSocio, 字符串 nombre) {
+        当前对象.numeroSocio = numeroSocio;
+        当前对象.nombre = nombre;
+    }
+
+    // ===== Getter：获取会员编号 =====
+    公有 整数 getNumeroSocio() {
+        返回 当前对象.numeroSocio;
+    }
+
+    // ===== Getter：获取会员姓名 =====
+    公有 字符串 getNombre() {
+        返回 当前对象.nombre;
+    }
+
+    // ===== toString：按要求格式返回文本 =====
+    公有 字符串 toString() {
+        返回 "[" + 当前对象.numeroSocio + "] " + 当前对象.nombre;
+    }
+}
+
+
+
+Sala：保存房间编号和描述，并提供读取与显示方法。
+类 Sala房间 {
+
+    // ===== 属性（私有）=====
+    私有 整数 codigoSala;      // 房间编号
+    私有 字符串 descripcion;   // 房间描述
+
+    // ===== 构造器 =====
+    公有 Sala(整数 codigoSala, 字符串 descripcion) {
+        当前对象.codigoSala = codigoSala;
+        当前对象.descripcion = descripcion;
+    }
+
+    // ===== Getter：获取房间编号 =====
+    公有 整数 getCodigoSala() {
+        返回 当前对象.codigoSala;
+    }
+
+    // ===== Getter：获取房间描述 =====
+    公有 字符串 getDescripcion() {
+        返回 当前对象.descripcion;
+    }
+
+    // ===== toString：返回便于显示的文本 =====
+    公有 字符串 toString() {
+        返回 "[" + 当前对象.codigoSala + "] " + 当前对象.descripcion;
+    }
+}
+
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+类 Gimnasio {
+
+    // ===== 属性（私有）=====
+    私有 字符串 codigo;              // 健身房代码
+    私有 字符串 nombre;              // 健身房名称
+    私有 Socio数组 listaSocios;      // 会员列表（固定大小，例如12）
+    私有 Sala数组 listaSalas;        // 房间列表（固定大小，例如6）
+    私有 整数 responsableId;         // 负责人会员编号（初始值 -1 表示无负责人）
+
+
+    // ===== 构造器 =====
+    公有 Gimnasio(字符串 codigo, 字符串 nombre) {
+        当前对象.codigo = codigo;
+        当前对象.nombre = nombre;
+        当前对象.listaSocios = 新建 Socio数组(12);
+        当前对象.listaSalas = 新建 Sala数组(6);
+        当前对象.responsableId = -1;
+    }
+
+
+    // =========================
+    // 会员管理（Gestión de socios）
+    // =========================
+
+    // 注册会员：第一空位插入 + 不能重复编号
+    公有 布尔 registrarSocio(Socio s) {
+        如果 s 是 null:
+            返回 false
+
+        如果 已存在相同会员编号:
+            返回 false
+
+        从头到尾遍历 listaSocios:
+            如果当前位置为空:
+                把 s 放进去
+                返回 true
+
+        // 走到这里说明数组满了
+        返回 false
+    }
+
+
+    // 开除会员：找到就删除并返回对象；找不到返回 null
+    公有 Socio expulsarSocio(整数 numero) {
+        从头到尾遍历 listaSocios:
+            如果当前位置不为空 且 会员编号 == numero:
+                保存当前会员对象到 eliminado
+                把当前位置设为 null（删除）
+
+                如果 被删除会员编号 == responsableId:
+                    responsableId = -1   // 负责人被开除了，清空负责人
+
+                返回 eliminado
+
+        返回 null
+    }
+
+
+    // 判断会员是否存在
+    公有 布尔 existeSocio(整数 numero) {
+        从头到尾遍历 listaSocios:
+            如果当前位置不为空 且 会员编号 == numero:
+                返回 true
+
+        返回 false
+    }
+
+
+    // 指定负责人：只能指定已经存在的会员
+    公有 布尔 designarResponsable(整数 numeroSocio) {
+        如果 existeSocio(numeroSocio) 为 true:
+            responsableId = numeroSocio
+            返回 true
+
+        返回 false
+    }
+
+
+    // =========================
+    // 房间管理（Gestión de salas）
+    // =========================
+
+    // 新增房间：第一空位插入 + 不能重复编号
+    公有 布尔 incorporarSala(Sala sala) {
+        如果 sala 是 null:
+            返回 false
+
+        从头到尾遍历 listaSalas:
+            如果当前位置不为空 且 房间编号 == sala的房间编号:
+                返回 false   // 编号重复
+
+        从头到尾遍历 listaSalas:
+            如果当前位置为空:
+                把 sala 放进去
+                返回 true
+
+        // 数组满了
+        返回 false
+    }
+
+
+    // =========================
+    // 报告信息（Resumen）
+    // =========================
+
+    // 返回完整报告文本（注意：这里只返回，不打印）
+    公有 字符串 obtenerInforme() {
+        创建 文本构建器 sb
+
+        追加：标题
+        追加：健身房代码和名称
+
+        统计会员数量（已占用/总容量）
+        追加：会员数量信息
+
+        追加：负责人信息
+        如果 responsableId == -1:
+            追加 "Sin responsable"
+        否则:
+            查找 responsableId 对应的会员对象
+            如果找到了:
+                追加 该会员的 toString()
+            否则:
+                追加 responsableId（保险写法）
+
+        追加：会员列表标题
+        遍历 listaSocios:
+            如果当前位置不为空:
+                追加该会员的 toString()
+
+        统计房间数量（已占用/总容量）
+        追加：房间数量信息
+
+        追加：房间列表标题
+        遍历 listaSalas:
+            如果当前位置不为空:
+                追加该房间的 toString()
+
+        返回 sb 转成字符串
+    }
+
+
+    // =========================
+    // 私有辅助方法（可选，但推荐）
+    // =========================
+
+    私有 整数 contarSocios() {
+        计数器 = 0
+        遍历 listaSocios:
+            如果当前位置不为空:
+                计数器++
+        返回 计数器
+    }
+
+    私有 整数 contarSalas() {
+        计数器 = 0
+        遍历 listaSalas:
+            如果当前位置不为空:
+                计数器++
+        返回 计数器
+    }
+
+    私有 Socio buscarSocioPorNumero(整数 numero) {
+        遍历 listaSocios:
+            如果当前位置不为空 且 会员编号 == numero:
+                返回该会员对象
+        返回 null
+    }
+}
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+类 Main {
+
+    公有 静态 无返回 main(字符串数组 args) {
+
+        // ===== 1. 创建一个健身房对象 =====
+        创建 Gimnasio对象 gym = 新建 Gimnasio("GP01", "GymPass Centro");
+
+        // ===== 2. 注册 3 个会员 =====
+        调用 gym.registrarSocio(新建 Socio(101, "Ana"));
+        调用 gym.registrarSocio(新建 Socio(102, "Carlos"));
+        调用 gym.registrarSocio(新建 Socio(103, "Lucia"));
+
+        // ===== 3. 添加 2 个房间 =====
+        调用 gym.incorporarSala(新建 Sala(1, "Sala de Musculación"));
+        调用 gym.incorporarSala(新建 Sala(2, "Sala de Cardio"));
+
+        // ===== 4. 指定负责人（必须是已注册会员）=====
+        调用 gym.designarResponsable(102);
+
+        // ===== 5. 获取并打印健身房报告 =====
+        在控制台输出 gym.obtenerInforme();
+    }
+}

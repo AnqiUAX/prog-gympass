@@ -1,3 +1,4 @@
+
 public class Sala {
 
     // 封装
