@@ -1,151 +1,160 @@
-
 public class Gimnasio {
 
-    // 封装
     // 健身房代码
     private String codigo;
     // 健身房名称
     private String nombre;
-    // 会员数组（固定12）
+    // 会员数组
     private Socio[] listaSocios;
-    // 房间数组（固定6）
+    // 房间数组
     private Sala[] listaSalas;
-    // 当前负责人的会员编号（-1 表示还没有负责人）
+    // 负责人编号(-1是没有的情况）
     private int responsableId;
+    // 最大容量
+    public final int MAX_SOCIOS;
+    public final int MAX_SALAS;
 
-
-    // 构造器作用于创建健身房时初始化基本信息和数组
+    // 默认容量构造器
     public Gimnasio(String codigo, String nombre) {
         this.codigo = codigo;
         this.nombre = nombre;
-        this.listaSocios = new Socio[12];
-        this.listaSalas = new Sala[6];
+
+        this.MAX_SOCIOS = 12;
+        this.MAX_SALAS = 6;
+
+        this.listaSocios = new Socio[MAX_SOCIOS];
+        this.listaSalas = new Sala[MAX_SALAS];
+
         this.responsableId = -1;
-    }
-
-    // =========================
-    //         会员管理
-    // =========================
-
-    // 注册会员：放到第一个空位，不允许重复编号
-    public boolean registrarSocio(Socio s) {
-        // 防止传入 null
-        if (s == null) {
-            return false;
-        }
-
-        // 先检查是否已经存在相同编号
-        if (existeSocio(s.getNumeroSocio())) {
-            return false;
-        }
-
-        // 找第一个空位置插入
-        for (int i = 0; i < listaSocios.length; i++) {
-            if (listaSocios[i] == null) {
-                listaSocios[i] = s;
-                return true;
-            }
-        }
-
-        // 数组满了，没有位置
-        return false;
-    }
-
-    // 开除会员：如果存在就删除并返回该对象；不存在返回 null
-    public Socio expulsarSocio(int numero) {
-        for (int i = 0; i < listaSocios.length; i++) {
-            if (listaSocios[i] != null && listaSocios[i].getNumeroSocio() == numero) {
-                // 先保存要删除的对象，后面要返回
-                Socio eliminado = listaSocios[i];
-
-                // 删除（置空）
-                listaSocios[i] = null;
-
-                // 如果被删除的人正好是负责人，负责人清空
-                if (responsableId == numero) {
-                    responsableId = -1;
-                }
-
-                return eliminado;
-            }
-        }
-
-        return null;
     }
 
     // 判断会员是否存在
     public boolean existeSocio(int numero) {
-        for (int i = 0; i < listaSocios.length; i++) {
+        boolean resultado = false;
+
+        for (int i = 0; i < MAX_SOCIOS && !resultado; i++) {
             if (listaSocios[i] != null && listaSocios[i].getNumeroSocio() == numero) {
-                return true;
+                resultado = true;
             }
         }
-        return false;
+
+        return resultado;
     }
 
-    // 指定负责人：必须是已经注册的会员
+    // 注册会员
+    public boolean registrarSocio(Socio s) {
+        boolean resultado = false;
+
+        // 先判断对象是否为空，编号是否重复
+        if (s != null && !existeSocio(s.getNumeroSocio())) {
+
+            // 找第一个空位
+            for (int i = 0; i < MAX_SOCIOS && !resultado; i++) {
+                if (listaSocios[i] == null) {
+                    listaSocios[i] = s;
+                    resultado = true;
+                }
+            }
+        }
+
+        return resultado;
+    }
+
+    // 开除会员
+    public Socio expulsarSocio(int numero) {
+        Socio socioEliminado = null;
+        boolean continuarBuscando = true;
+
+        for (int i = 0; i < MAX_SOCIOS && continuarBuscando; i++) {
+            if (listaSocios[i] != null && listaSocios[i].getNumeroSocio() == numero) {
+                socioEliminado = listaSocios[i];
+                listaSocios[i] = null;
+
+                // 如果删掉的是负责人，清空负责人
+                if (responsableId == numero) {
+                    responsableId = -1;
+                }
+
+                continuarBuscando = false;
+            }
+        }
+
+        return socioEliminado;
+    }
+
+    // 指定负责人
     public boolean designarResponsable(int numeroSocio) {
+        boolean resultado = false;
+
         if (existeSocio(numeroSocio)) {
             responsableId = numeroSocio;
-            return true;
+            resultado = true;
         }
-        return false;
+
+        return resultado;
     }
 
-    // =========================
-    //         房间管理
-    // =========================
-
-    // 新增房间：放到第一个空位，不允许重复房间编号
+    // 添加房间
     public boolean incorporarSala(Sala sala) {
-        // 防止传入 null
-        if (sala == null) {
-            return false;
-        }
+        boolean resultado = false;
 
-        // 检查房间编号是否重复
-        for (int i = 0; i < listaSalas.length; i++) {
-            if (listaSalas[i] != null && listaSalas[i].getCodigoSala() == sala.getCodigoSala()) {
-                return false;
+        if (sala != null) {
+
+            // 先检查房间编号是否重复
+            boolean salaRepetida = false;
+            for (int i = 0; i < MAX_SALAS && !salaRepetida; i++) {
+                if (listaSalas[i] != null && listaSalas[i].getCodigoSala() == sala.getCodigoSala()) {
+                    salaRepetida = true;
+                }
+            }
+
+            // 不重复时再找空位
+            if (!salaRepetida) {
+                for (int i = 0; i < MAX_SALAS && !resultado; i++) {
+                    if (listaSalas[i] == null) {
+                        listaSalas[i] = sala;
+                        resultado = true;
+                    }
+                }
             }
         }
 
-        // 找第一个空位置插入
-        for (int i = 0; i < listaSalas.length; i++) {
-            if (listaSalas[i] == null) {
-                listaSalas[i] = sala;
-                return true;
-            }
-        }
-
-        // 数组满了
-        return false;
+        return resultado;
     }
 
-    // =========================
-    //         报告信息
-    // =========================
-
-    // 返回完整报告字符串（这里不打印，只返回字符串）
+    // 生成报告
     public String obtenerInforme() {
         StringBuilder sb = new StringBuilder();
 
-        // 基本信息
+        // 标题和基本信息
         sb.append("=== INFORME GYMPASS ===\n");
-        sb.append("Código: ").append(codigo).append("\n");
+        sb.append("Codigo: ").append(codigo).append("\n");
         sb.append("Nombre: ").append(nombre).append("\n\n");
 
-        // 会员统计
-        int sociosOcupados = contarSocios();
-        sb.append("Socios: ").append(sociosOcupados).append("/").append(listaSocios.length).append("\n");
+        // 统计会员数量
+        int sociosOcupados = 0;
+        for (int i = 0; i < MAX_SOCIOS; i++) {
+            if (listaSocios[i] != null) {
+                sociosOcupados++;
+            }
+        }
 
-        // 负责人信息
+        sb.append("Socios: ").append(sociosOcupados).append("/").append(MAX_SOCIOS).append("\n");
+
+        // 显示负责人
         sb.append("Responsable actual: ");
         if (responsableId == -1) {
             sb.append("Sin responsable\n");
         } else {
-            Socio responsable = buscarSocioPorNumero(responsableId);
-            // 正常情况下应该能找到；这里做个保护
+            Socio responsable = null;
+
+            // 在会员数组里找负责人对象
+            for (int i = 0; i < MAX_SOCIOS && responsable == null; i++) {
+                if (listaSocios[i] != null && listaSocios[i].getNumeroSocio() == responsableId) {
+                    responsable = listaSocios[i];
+                }
+            }
+
             if (responsable != null) {
                 sb.append(responsable.toString()).append("\n");
             } else {
@@ -155,7 +164,7 @@ public class Gimnasio {
 
         // 会员列表
         sb.append("Listado de socios:\n");
-        for (int i = 0; i < listaSocios.length; i++) {
+        for (int i = 0; i < MAX_SOCIOS; i++) {
             if (listaSocios[i] != null) {
                 sb.append(" - ").append(listaSocios[i].toString()).append("\n");
             }
@@ -163,54 +172,24 @@ public class Gimnasio {
 
         sb.append("\n");
 
-        // 房间统计
-        int salasOcupadas = contarSalas();
-        sb.append("Salas: ").append(salasOcupadas).append("/").append(listaSalas.length).append("\n");
+        // 统计房间数量
+        int salasOcupadas = 0;
+        for (int i = 0; i < MAX_SALAS; i++) {
+            if (listaSalas[i] != null) {
+                salasOcupadas++;
+            }
+        }
+
+        sb.append("Salas: ").append(salasOcupadas).append("/").append(MAX_SALAS).append("\n");
 
         // 房间列表
         sb.append("Listado de salas:\n");
-        for (int i = 0; i < listaSalas.length; i++) {
+        for (int i = 0; i < MAX_SALAS; i++) {
             if (listaSalas[i] != null) {
                 sb.append(" - ").append(listaSalas[i].toString()).append("\n");
             }
         }
 
         return sb.toString();
-    }
-
-    // =========================
-    // 私有辅助方法
-    // =========================
-
-    // 统计当前已注册会员数量
-    private int contarSocios() {
-        int contador = 0;
-        for (int i = 0; i < listaSocios.length; i++) {
-            if (listaSocios[i] != null) {
-                contador++;
-            }
-        }
-        return contador;
-    }
-
-    // 统计当前已添加房间数量
-    private int contarSalas() {
-        int contador = 0;
-        for (int i = 0; i < listaSalas.length; i++) {
-            if (listaSalas[i] != null) {
-                contador++;
-            }
-        }
-        return contador;
-    }
-
-    // 按会员编号查找对象（用于显示负责人信息）
-    private Socio buscarSocioPorNumero(int numero) {
-        for (int i = 0; i < listaSocios.length; i++) {
-            if (listaSocios[i] != null && listaSocios[i].getNumeroSocio() == numero) {
-                return listaSocios[i];
-            }
-        }
-        return null;
     }
 }
